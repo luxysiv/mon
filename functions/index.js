@@ -10,8 +10,6 @@ const PROVIDER_INFO = {
     image: {
         url: "https://phimapi.com/phimimg/logo.png",
         type: "contain",
-        height: 50,
-        width: 50
     },
     grid_number: 4,
 };
@@ -45,7 +43,7 @@ function mapMovieToListChannel(movieData, pagesDomain) {
         description: `Tình trạng: ${movieData.episode_current}. Năm: ${movieData.year}. Thể loại: ${categories}`,
         label: `${movieData.episode_current} - ${movieData.quality}`,
         image: {
-            url: movieData.poster_url,
+            url: movieData.thumb_url,
             type: "contain",
             width: 1920,
             height: 1080
