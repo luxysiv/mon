@@ -1,3 +1,5 @@
+// functions/index.js
+
 const BASE_API_URL = "https://phimapi.com";
 const PROVIDER_INFO = {
     id: "phimapi-latest",
@@ -28,27 +30,35 @@ async function fetchNewMovies(page) {
 }
 
 /**
- * Ánh xạ dữ liệu phim từ danh sách sang cấu trúc 'channel' cơ bản.
+ * Ánh xạ dữ liệu phim từ danh sách sang cấu trúc 'channel' cơ bản,
+ * sử dụng remote_data để trỏ đến endpoint chi tiết.
  */
-function mapMovieToListChannel(movieData) {
+function mapMovieToListChannel(movieData, pagesDomain) {
     const categories = movieData.category ? movieData.category.map(c => c.name).join(', ') : 'Chưa rõ';
     
+    // Xây dựng URL chi tiết dựa trên slug và tên miền Pages hiện tại
+    const detailApiUrl = `https://${pagesDomain}/phim/${movieData.slug}`;
+
     return {
-        id: movieData.slug, // Dùng slug làm ID để dễ dàng link đến trang chi tiết
+        id: movieData.slug,
         name: movieData.name,
         description: `Tình trạng: ${movieData.episode_current}. Năm: ${movieData.year}. Thể loại: ${categories}`,
         label: `${movieData.episode_current} - ${movieData.quality}`,
         image: {
-            url: movieData.poster_url, // Dùng poster_url cho hình ảnh lớn hơn
+            url: movieData.poster_url,
             type: "contain",
             width: 1920,
             height: 1080
         },
-        detail_url: `/phim/${movieData.slug}`, // URL để client fetch chi tiết
         display: "default",
         type: movieData.type === 'series' ? "series" : "single",
         enable_detail: true,
-        sources: [] // Để trống vì link stream sẽ được tải ở API chi tiết
+        // Dùng remote_data để chỉ định nơi lấy dữ liệu chi tiết
+        remote_data: {
+            "url": detailApiUrl,
+            "request_headers": []
+        },
+        sources: [] 
     };
 }
 
@@ -69,8 +79,11 @@ export async function onRequest(context) {
                 headers: { 'Content-Type': 'application/json' },
             });
         }
+        
+        // Lấy hostname (ví dụ: my-project.pages.dev)
+        const pagesDomain = url.hostname;
 
-        const channels = newMoviesData.items.map(mapMovieToListChannel);
+        const channels = newMoviesData.items.map(movie => mapMovieToListChannel(movie, pagesDomain));
 
         const finalJson = {
             ...PROVIDER_INFO,
