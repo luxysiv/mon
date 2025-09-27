@@ -66,7 +66,7 @@ function mapMovieToChannelDetail(movieDetail, episodes) {
         description: movieDetail.content, 
         label: movieDetail.episode_current || "Full",
         image: {
-            url: movieDetail.poster_url, 
+            url: movieDetail.thumb_url, 
             type: "contain",
             width: 1920,
             height: 1080
